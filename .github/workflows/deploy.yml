@@ -44,9 +44,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
-        run: npm ci # or pnpm install / yarn install / bun install
+        run: npm ci --prefix docs # or pnpm install --prefix docs / yarn install --cwd docs / bun install --prefix docs
       - name: Build with VitePress
-        run: npm run docs:build # or pnpm docs:build / yarn docs:build / bun run docs:build
+        run: npm run docs:build --prefix docs # or pnpm docs:build --prefix docs / yarn docs:build --cwd docs / bun run docs:build --prefix docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
