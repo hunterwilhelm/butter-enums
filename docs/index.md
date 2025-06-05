@@ -30,7 +30,7 @@ import { ButterKeyedEnum, ButterTupleEnum } from "butter-enums"
 ```ts twoslash
 import { ButterTupleEnum } from "../src/index"
 // ---cut---
-const test = ButterTupleEnum(['test', 'Test'])
+const test = ButterTupleEnum(['blue', 'green', 'red'])
 
 console.log(test.tuple)
 //               ^?
@@ -47,13 +47,13 @@ console.log(test.enum)
 import { ButterKeyedEnum } from "../src/index"
 // ---cut---
 const test = ButterKeyedEnum({
-  test: {
-    name: 'Test',
-    description: 'Test',
+  green: {
+    emoji: '🟩',
+    hex: '#00FF00',
   },
 })
 
-console.log(test.enum.test)
+console.log(test.enum.green)
 //                    ^?
 ```
 
