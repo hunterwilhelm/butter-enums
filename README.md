@@ -1,3 +1,13 @@
+
+<div align="center">
+  <a href="https://www.npmjs.com/package/butter-enums">
+    <img alt="weekly downloads" src="https://img.shields.io/npm/dw/butter-enums?logo=npm" />
+  </a>
+  <a href="https://github.com/hunterwilhelm/butter-enums/blob/main/LICENSE">
+    <img alt="MIT License" src="https://img.shields.io/github/license/hunterwilhelm/butter-enums?logo=open-source-initiative" />
+  </a>
+</div>
+
 # Butter Enums
 
 > Smooth like butter - Type-safe enum utilities for TypeScript
