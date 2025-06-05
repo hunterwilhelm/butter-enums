@@ -6,7 +6,7 @@ import { transformerTwoslash } from '@shikijs/vitepress-twoslash'
 export default defineConfig({
   title: "Butter Enums",
   description: "Type-safe specialized enums for TypeScript",
-  base: '/',
+  base: '/butter-enums/',
   themeConfig: {
     
     // https://vitepress.dev/reference/default-theme-config
