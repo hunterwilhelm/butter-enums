@@ -28,8 +28,8 @@ describe('ButterTupleEnum', () => {
     expect(Colors.length).toBe(3);
   });
 
-  it('should return the original tuple when serialized', () => {
-    expect(Colors.toSerializable()).toEqual(['red', 'green', 'blue']);
+  it('should return the original tuple', () => {
+    expect(Colors.tuple).toEqual(['red', 'green', 'blue']);
   });
 
   it('should deeply freeze the tuple and enum', () => {
@@ -93,14 +93,14 @@ describe('ButterKeyedEnum', () => {
     expect(Fruits.get('nonexistent')).toBeUndefined();
   });
 
-  it('should retrieve multiple values by keys using getAll()', () => {
-    const result = Fruits.getAll(['apple', 'lemon']);
+  it('should retrieve multiple values by keys using getMany()', () => {
+    const result = Fruits.getMany(['apple', 'lemon']);
     expect(result).toHaveLength(2);
     expect(result[0].name).toBe('Apple');
     expect(result[1].name).toBe('Lemon');
 
     // Should handle nonexistent keys
-    expect(Fruits.getAll(['apple', 'nonexistent'])[1]).toBeUndefined();
+    expect(Fruits.getMany(['apple', 'nonexistent'])[1]).toBeUndefined();
   });
 
   it('should provide all keys', () => {

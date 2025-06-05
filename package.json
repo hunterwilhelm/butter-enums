@@ -21,7 +21,7 @@
     "type-safe",
     "butter"
   ],
-  "author": "",
+  "author": "Hunter Wilhelm",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.2.2",
@@ -37,5 +37,8 @@
   },
   "dependencies": {
     "deep-freeze-es6": "^4.0.0"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }
