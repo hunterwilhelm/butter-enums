@@ -28,24 +28,36 @@ import { ButterKeyedEnum, ButterTupleEnum } from "butter-enums"
 
 ## Tuple Enums
 ```ts twoslash
-import { ButterTupleEnum } from "../src/index"
-// ---cut---
+import { ButterTupleEnum } from "butter-enums"
+
 const test = ButterTupleEnum(['blue', 'green', 'red'])
 
 console.log(test.tuple)
 //               ^?
 
 
+
+
+
+
+
 console.log(test.enum)
 //               ^?
 ```
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 <br />
 
 
 ## Keyed Enums
 ```ts twoslash
-import { ButterKeyedEnum } from "../src/index"
-// ---cut---
+import { ButterKeyedEnum } from "butter-enums"
+
 const test = ButterKeyedEnum({
   green: {
     emoji: '🟩',
