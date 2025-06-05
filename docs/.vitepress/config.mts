@@ -6,9 +6,17 @@ import { transformerTwoslash } from '@shikijs/vitepress-twoslash'
 export default defineConfig({
   title: "Butter Enums",
   description: "Type-safe specialized enums for TypeScript",
-  base: '/butter-enums/',
   head: [
-    ['link', { rel: 'icon', href: 'favicon.ico', type: 'image/x-icon' }]
+    ['link', { rel: 'icon', href: 'favicon.ico', type: 'image/x-icon' }],
+    ['meta', { property: 'og:image', content: 'https://butter-enums.hunterwilhelm.com/og.jpg' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: 'Butter Enums' }],
+    ['meta', { property: 'og:description', content: 'Type-safe specialized enums for TypeScript' }],
+    ['meta', { property: 'og:url', content: 'https://butter-enums.hunterwilhelm.com' }],
+    ['meta', { property: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { property: 'twitter:title', content: 'Butter Enums' }],
+    ['meta', { property: 'twitter:description', content: 'Type-safe specialized enums for TypeScript' }],
+    ['meta', { property: 'twitter:image', content: 'https://butter-enums.hunterwilhelm.com/og.jpg' }],
   ],
   themeConfig: {
     
