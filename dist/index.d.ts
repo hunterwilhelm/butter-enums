@@ -77,28 +77,29 @@ export declare function ButterTupleEnum<const T extends readonly string[]>(tuple
  * @template TEnum The object type containing enum entries
  * @returns The keyed enum object with helper methods
  */
-export declare function ButterKeyedEnum<const T extends {
-    [key: string]: {
-        key?: never;
-        [key: string]: any;
-    };
-}>(enumObject: T): {
+export declare function ButterKeyedEnum<KeyName extends string = "key", const T extends {
+    [K in keyof T]: KeyName extends keyof T[K] ? never : Record<string, any>;
+} = {
+    [key: string]: any;
+}>(enumObject: T, options?: {
+    keyName?: KeyName;
+}): {
     /**
      * The enum object
      *
      * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
      */
-    readonly enum: Readonly<HoistKeyToInner<T>>;
+    readonly enum: Readonly<HoistKeyToInner<T, KeyName>>;
     /**
      * Gets a value by key
      *
      * @param key The key to retrieve the value for
      * @returns {TEnum[keyof TEnum] | undefined} The value for the given key or undefined if the key doesn't exist
      */
-    readonly get: (key: keyof T | (string & {})) => Readonly<HoistKeyToInner<T>>[keyof T] | undefined;
+    readonly get: (key: keyof T | (string & {})) => Readonly<HoistKeyToInner<T, KeyName>>[keyof T] | undefined;
     readonly getMany: {
-        (keys: (keyof T)[]): Readonly<HoistKeyToInner<T>>[keyof T][];
-        (keys: string[]): (Readonly<HoistKeyToInner<T>>[keyof T] | undefined)[];
+        (keys: (keyof T)[]): Readonly<HoistKeyToInner<T, KeyName>>[keyof T][];
+        (keys: string[]): (Readonly<HoistKeyToInner<T, KeyName>>[keyof T] | undefined)[];
     };
     /**
      * All keys in the enum
@@ -111,14 +112,14 @@ export declare function ButterKeyedEnum<const T extends {
      *
      * @returns {TEnum[keyof TEnum][]} All values in the enum
      */
-    readonly values: Readonly<HoistKeyToInner<T>>[keyof T][];
+    readonly values: Readonly<HoistKeyToInner<T, KeyName>>[keyof T][];
     /**
      * Finds a value by predicate
      *
      * @param predicate A function that tests each value for a condition
      * @returns {TEnum[keyof TEnum] | undefined} The first value that matches the predicate or undefined if no match is found
      */
-    readonly find: (predicate: (value: Readonly<HoistKeyToInner<T>>[keyof T], key: keyof T, enumObject: Readonly<HoistKeyToInner<T>>) => boolean) => Readonly<HoistKeyToInner<T>>[keyof T] | undefined;
+    readonly find: (predicate: (value: Readonly<HoistKeyToInner<T, KeyName>>[keyof T], key: keyof T, enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => boolean) => Readonly<HoistKeyToInner<T, KeyName>>[keyof T] | undefined;
 };
 /**
  * Utility type that hoists the key name into each value object
@@ -129,11 +130,11 @@ export declare function ButterKeyedEnum<const T extends {
  * @template T The input object type with nested objects as values
  * @returns A type with the same structure but with keys hoisted into each value
  */
-type HoistKeyToInner<T> = {
+type HoistKeyToInner<T, KeyName extends string = "key"> = {
     [K in keyof T]: {
-        [P in keyof T[K] as P extends "key" ? never : P]: T[K][P];
+        [P in keyof T[K] as P extends KeyName ? never : P]: T[K][P];
     } extends infer O ? {
-        [P in keyof O | "key"]: P extends keyof O ? O[P] : K;
+        [P in keyof O | KeyName]: P extends keyof O ? O[P] : K;
     } : never;
 };
 export {};

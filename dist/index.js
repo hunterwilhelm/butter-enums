@@ -100,9 +100,9 @@ function ButterTupleEnum(tuple) {
  * @template TEnum The object type containing enum entries
  * @returns The keyed enum object with helper methods
  */
-function ButterKeyedEnum(enumObject) {
+function ButterKeyedEnum(enumObject, options) {
     const $enum = (0, deep_freeze_es6_1.default)(Object.fromEntries(Object.entries(enumObject)
-        .map(([key, value]) => [key, { ...value, key }])));
+        .map(([key, value]) => [key, { ...value, [options?.keyName ?? "key"]: key }])));
     function getMany(keys) {
         return keys.map(key => $enum[key]);
     }

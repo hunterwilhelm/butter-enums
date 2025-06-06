@@ -115,7 +115,7 @@ const T extends {
     [k: string]: {
       [k: string]: any
     }
-  }
+  } as Readonly<HoistKeyToInner<T, KeyName>>
 
   /**
    * Gets multiple values by keys
@@ -126,7 +126,7 @@ const T extends {
   function getMany(keys: (keyof TEnum)[]): TEnum[keyof TEnum][];
   function getMany(keys: string[]): (TEnum[keyof TEnum] | undefined)[];
   function getMany(keys: (keyof TEnum | (string & {}))[]) {
-      return keys.map(key => $enum[key])
+      return keys.map(key => $enum[key as keyof TEnum])
   }
 
 
@@ -137,7 +137,7 @@ const T extends {
      * 
      * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
      */
-    enum: $enum as Readonly<HoistKeyToInner<T, KeyName>>,
+    enum: $enum,
     /**
      * Gets a value by key
      *
@@ -145,7 +145,7 @@ const T extends {
      * @returns {TEnum[keyof TEnum] | undefined} The value for the given key or undefined if the key doesn't exist
      */
     get(key: keyof TEnum | (string & {})): TEnum[keyof TEnum] | undefined {
-      return $enum[key]
+      return $enum[key as keyof TEnum]
     },
     getMany,
     /**
@@ -154,7 +154,7 @@ const T extends {
      * @returns {(keyof TEnum)[]} All keys in the enum
      */
     get keys(): (keyof TEnum)[] {
-      return Object.keys($enum)
+      return Object.keys($enum) satisfies string[] as (keyof TEnum)[]
     },
     /**
      * All values in the enum
@@ -171,7 +171,7 @@ const T extends {
      * @returns {TEnum[keyof TEnum] | undefined} The first value that matches the predicate or undefined if no match is found
      */
     find(predicate: (value: TEnum[keyof TEnum], key: keyof TEnum, enumObject: TEnum) => boolean): TEnum[keyof TEnum] | undefined {
-      return Object.values($enum).find((value, key) => predicate(value, key, $enum))
+      return Object.values($enum).find((value: any, key: any) => predicate(value, key, $enum)) as any
     }
   } as const
 }
