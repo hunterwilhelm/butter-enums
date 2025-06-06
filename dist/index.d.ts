@@ -136,10 +136,8 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      *
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
-    readonly tuple: IsTypeEqual<TResult[number][KeyName], keyof T> extends true ? TResult : {
-        error: "You must include all keys in the tuple";
-        value: never;
-    };
+    readonly tuple: TTuple;
+    readonly mapTuple: (fn: (value: TTuple[number], index: number, array: TTuple) => any) => { [K in keyof TTuple]: any; };
     /**
      * Gets a value by key
      *
@@ -191,4 +189,4 @@ type HoistKeyToInner<T, KeyName extends string = "key"> = {
  * Utility type that checks if two types are equal
  */
 type IsTypeEqual<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
-export {};
+export { mapTuple, mapTupleWithIndex } from './mapTuple';

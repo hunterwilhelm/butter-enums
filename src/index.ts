@@ -4,6 +4,7 @@
  * Smooth like butter
  */
 import deepFreeze from "deep-freeze-es6"
+import { mapTuple } from "./mapTuple"
 
 /**
  * Butter Tuple Enum
@@ -159,7 +160,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
       [k: string]: any
     }
   } as Readonly<HoistKeyToInner<T, KeyName>>
-  const $tuple = options.tupleFactory($enum)
+  const $tuple = deepFreeze(options.tupleFactory($enum) as unknown as TTuple)
 
   /**
    * Gets multiple values by keys
@@ -187,7 +188,8 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * 
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
-    tuple: deepFreeze($tuple),
+    tuple: $tuple,
+    mapTuple: (fn: (value: TTuple[number], index: number, array: typeof $tuple) => any) => mapTuple($tuple, fn),
     /**
      * Gets a value by key
      *
@@ -249,3 +251,9 @@ type HoistKeyToInner<T, KeyName extends string = "key"> = {
 type IsTypeEqual<A, B> =
   (<T>() => T extends A ? 1 : 2) extends
   (<T>() => T extends B ? 1 : 2) ? true : false;
+
+// Export mapTuple functions
+export { mapTuple, mapTupleWithIndex } from './mapTuple';
+
+
+

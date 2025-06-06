@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.mapTupleWithIndex = exports.mapTuple = void 0;
 exports.ButterTupleEnum = ButterTupleEnum;
 exports.ButterKeyedEnum = ButterKeyedEnum;
 /**
@@ -11,6 +12,7 @@ exports.ButterKeyedEnum = ButterKeyedEnum;
  * Smooth like butter
  */
 const deep_freeze_es6_1 = __importDefault(require("deep-freeze-es6"));
+const mapTuple_1 = require("./mapTuple");
 /**
  * Butter Tuple Enum
  *
@@ -125,7 +127,7 @@ function ButterTupleEnum(tuple) {
 function ButterKeyedEnum(enumObject, options) {
     const $enum = (0, deep_freeze_es6_1.default)(Object.fromEntries(Object.entries(enumObject)
         .map(([key, value]) => [key, { ...value, [options?.keyName ?? "key"]: key }])));
-    const $tuple = options.tupleFactory($enum);
+    const $tuple = (0, deep_freeze_es6_1.default)(options.tupleFactory($enum));
     function getMany(keys) {
         return keys.map(key => $enum[key]);
     }
@@ -141,7 +143,8 @@ function ButterKeyedEnum(enumObject, options) {
          *
          * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
          */
-        tuple: (0, deep_freeze_es6_1.default)($tuple),
+        tuple: $tuple,
+        mapTuple: (fn) => (0, mapTuple_1.mapTuple)($tuple, fn),
         /**
          * Gets a value by key
          *
@@ -179,3 +182,7 @@ function ButterKeyedEnum(enumObject, options) {
         }
     };
 }
+// Export mapTuple functions
+var mapTuple_2 = require("./mapTuple");
+Object.defineProperty(exports, "mapTuple", { enumerable: true, get: function () { return mapTuple_2.mapTuple; } });
+Object.defineProperty(exports, "mapTupleWithIndex", { enumerable: true, get: function () { return mapTuple_2.mapTupleWithIndex; } });
