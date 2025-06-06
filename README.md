@@ -75,6 +75,19 @@ const Fruits = ButterKeyedEnum({
     color: 'yellow',
     sweetness: 2
   }
+}, {
+  // This is required because typescript cannot convert from a union to a tuple with
+  // * Guaranteed order
+  // * Better performance than O(n^2)
+  // See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
+  //
+  // So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
+  // Making our typescript compiler happy.
+  tupleFactory: (enumObject) => [
+    enumObject.apple,
+    enumObject.lemon,
+    enumObject.banana,
+  ]
 });
 
 // Access enum values

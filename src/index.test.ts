@@ -69,7 +69,36 @@ describe('ButterKeyedEnum', () => {
       color: 'yellow',
       sweetness: 2
     }
+  }, {
+    tupleFactory: (enumObject) => [
+      enumObject.apple,
+      enumObject.lemon,
+      enumObject.banana,
+    ]
   });
+
+  it('should create a tuple from the enum object', () => {
+    expect(Fruits.tuple).toEqual([
+      {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7,
+        key: 'apple'
+      },
+      {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+        key: 'lemon'
+      },
+      {
+        name: 'Banana',
+        color: 'yellow',
+        sweetness: 8,
+        key: 'banana'
+      },
+    ])
+  })
 
 
   it('should create an enum object with the provided values and add keys', () => {
@@ -141,12 +170,96 @@ describe('ButterKeyedEnum', () => {
     }).toThrow();
   });
 
-  it('should work with empty objects', () => {
-    const EmptyEnum = ButterKeyedEnum({});
+  it('should work with empty objects, but the typing should warn', () => {
+    const EmptyEnum = ButterKeyedEnum({}, {
+      // @ts-expect-error
+      tupleFactory: (enumObject) => []
+    });
     expect(EmptyEnum.enum).toEqual({});
     expect(EmptyEnum.keys).toEqual([]);
     expect(EmptyEnum.values).toEqual([]);
   });
+
+  it('should work with bad tuple factory, but the typing should warn', () => {
+    const BadEnum = ButterKeyedEnum({
+      apple: {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7
+      },
+      banana: {
+        name: 'Banana',
+        color: 'yellow',
+        sweetness: 8
+      },
+      lemon: {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+      }
+    }, {
+      // @ts-expect-error
+      tupleFactory: (enumObject) => [
+        enumObject.apple,
+        enumObject.lemon,
+      ]
+    })
+    expect(BadEnum.enum).toEqual({
+      apple: {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7,
+        key: 'apple'
+      },
+      banana: {
+        name: 'Banana',
+        color: 'yellow',
+        sweetness: 8,
+        key: 'banana'
+      },
+      lemon: {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+        key: 'lemon'
+      }
+    })
+    expect(BadEnum.keys).toEqual(['apple', 'banana', 'lemon'])
+    expect(BadEnum.values).toEqual([
+      {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7,
+        key: 'apple'
+      },
+      {
+        name: 'Banana',
+        color: 'yellow',
+        sweetness: 8,
+        key: 'banana'
+      },
+      {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+        key: 'lemon'
+      }
+    ])
+    expect(BadEnum.tuple).toEqual([
+      {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7,
+        key: 'apple'
+      },
+      {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+        key: 'lemon'
+      }
+    ])
+  })
 
 
   const Slugs = ButterKeyedEnum({
@@ -166,8 +279,36 @@ describe('ButterKeyedEnum', () => {
       sweetness: 2,
     }
   }, {
-    keyName: 'slug'
+    keyName: 'slug',
+    tupleFactory: (enumObject) => [
+      enumObject.lemon,
+      enumObject.banana,
+      enumObject.apple,
+    ]
   });
+
+  it('should create a tuple from the enum object', () => {
+    expect(Slugs.tuple).toEqual([
+      {
+        name: 'Lemon',
+        color: 'yellow',
+        sweetness: 2,
+        slug: 'lemon'
+      },
+      {
+        name: 'Banana',
+        color: 'yellow',
+        sweetness: 8,
+        slug: 'banana'
+      },
+      {
+        name: 'Apple',
+        color: 'red',
+        sweetness: 7,
+        slug: 'apple'
+      },
+    ])
+  })
 
   it('should create an enum object with the provided values and add keys', () => {
     expect(Slugs.enum.apple).toEqual({

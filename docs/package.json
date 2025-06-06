@@ -9,6 +9,6 @@
     "vitepress": "^1.6.3"
   },
   "dependencies": {
-    "butter-enums": "^0.0.1"
+    "butter-enums": "file:.."
   }
 }

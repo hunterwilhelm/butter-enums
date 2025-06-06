@@ -74,15 +74,56 @@ export declare function ButterTupleEnum<const T extends readonly string[]>(tuple
  * colorsEnum.keys // ['green']
  * ```
  *
- * @template TEnum The object type containing enum entries
- * @returns The keyed enum object with helper methods
+ * @template KeyName - The name of the property to hoist the key into. Defaults to `"key"`.
+ * @template T - The original enum-like object whose keys should not conflict with `keyName` in inner objects.
+ * @template TTuple - The tuple of values derived from `T` that will represent the enum values.
+ * @template TResult - The final result tuple validated against the keys of `T`.
+ *
+ * @param {T} enumObject - The original object representing the enum-like mapping.
+ * @param {Object} options - Configuration options.
+ * @param {KeyName} [options.keyName="key"] - The name of the key to inject into each value.
+ * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TResult} options.tupleFactory - A factory function
+ *   that takes the modified enum object with keys hoisted and returns a tuple. It must include all keys from `enumObject`.
+ *
+ *   This is required because typescript cannot convert from a union to a tuple with
+ *   * Guaranteed order
+ *   * Better performance than O(n^2)
+ *   See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
+ *
+ *   So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
+ *   Making our typescript compiler happy.
+ *
+ * @returns {void} This function does not return anything directly, but can be used to enforce compile-time constraints
+ *   and build strongly typed enums using TypeScript's type system.
+ *
+ * @throws {TypeError} If any object in `enumObject` already contains the `keyName` property, it will result in a type error.
+ * @throws {Error} If the `tupleFactory` does not return a tuple that includes all keys, a compile-time type error will occur.
  */
 export declare function ButterKeyedEnum<KeyName extends string = "key", const T extends {
     [K in keyof T]: KeyName extends keyof T[K] ? never : Record<string, any>;
 } = {
     [key: string]: any;
-}>(enumObject: T, options?: {
+}, TTuple extends [T[keyof T], ...T[keyof T][]] = [T[keyof T], ...T[keyof T][]], TResult extends [T[keyof T], ...T[keyof T][]] = TTuple>(enumObject: T, options: {
     keyName?: KeyName;
+    /**
+     * A factory function that takes the modified enum object with keys hoisted and returns a tuple.
+     * It must include all keys from `enumObject`.
+     *
+     * @param enumObject The enum object with keys hoisted into each value
+     * @returns A tuple of values from the enum object
+     *
+     * This is required because typescript cannot convert from a union to a tuple with
+     * * Guaranteed order
+     * * Better performance than O(n^2)
+     * See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
+     *
+     * So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
+     * Making our typescript compiler happy.
+     */
+    tupleFactory: (enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => IsTypeEqual<TResult[number][KeyName], keyof T> extends true ? TResult : {
+        error: "You must include all keys in the tuple";
+        value: never;
+    };
 }): {
     /**
      * The enum object
@@ -90,6 +131,15 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
      */
     readonly enum: Readonly<HoistKeyToInner<T, KeyName>>;
+    /**
+     * An ordered array of enum values as specified by the tupleFactory function
+     *
+     * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
+     */
+    readonly tuple: IsTypeEqual<TResult[number][KeyName], keyof T> extends true ? TResult : {
+        error: "You must include all keys in the tuple";
+        value: never;
+    };
     /**
      * Gets a value by key
      *
@@ -137,4 +187,8 @@ type HoistKeyToInner<T, KeyName extends string = "key"> = {
         [P in keyof O | KeyName]: P extends keyof O ? O[P] : K;
     } : never;
 };
+/**
+ * Utility type that checks if two types are equal
+ */
+type IsTypeEqual<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 export {};
