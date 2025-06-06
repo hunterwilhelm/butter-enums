@@ -82,8 +82,8 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      *
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
-    readonly tuple: TTuple;
-    readonly mapTuple: (fn: (value: TTuple[number], index: number, array: TTuple) => any) => { [K in keyof TTuple]: any; };
+    readonly tuple: TResult;
+    readonly mapTuple: <U>(fn: (value: TResult[number], index: number, array: TResult) => U) => { [K in keyof TResult]: U; };
     /**
      * Gets a value by key
      *

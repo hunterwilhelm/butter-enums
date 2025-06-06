@@ -34,7 +34,7 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
      * @type {T} The tuple of strings
      */
     tuple: $tuple,
-    mapTuple: (fn: (value: T[number], index: number, tuple: typeof $tuple) => T[number]) => mapTuple($tuple, fn),
+    mapTuple: <U>(fn: (value: T[number], index: number, tuple: typeof $tuple) => U) => mapTuple($tuple, fn),
     /**
      * The enum object
      *

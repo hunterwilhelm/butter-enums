@@ -87,7 +87,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
       [k: string]: any
     }
   } as Readonly<HoistKeyToInner<T, KeyName>>
-  const $tuple = deepFreeze(options.tupleFactory($enum) as unknown as TTuple)
+  const $tuple = deepFreeze(options.tupleFactory($enum) as TResult)
 
   /**
    * Gets multiple values by keys
@@ -116,7 +116,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
     tuple: $tuple,
-    mapTuple: (fn: (value: TTuple[number], index: number, array: typeof $tuple) => any) => mapTuple($tuple, fn),
+    mapTuple: <U>(fn: (value: typeof $tuple[number], index: number, array: typeof $tuple) => U) => mapTuple($tuple, fn),
     /**
      * Gets a value by key
      *

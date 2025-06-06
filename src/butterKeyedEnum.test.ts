@@ -301,4 +301,12 @@ describe('ButterKeyedEnum', () => {
     expect(Slugs.values[1].slug).toBe('banana');
     expect(Slugs.values[2].slug).toBe('lemon');
   });
+
+  it('should map over the tuple', () => {
+    expect(Slugs.mapTuple(value => value.slug.toUpperCase())).toEqual([
+      'LEMON',
+      'BANANA',
+      'APPLE',
+    ])
+  })
 });
