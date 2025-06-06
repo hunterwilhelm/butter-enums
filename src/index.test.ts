@@ -71,6 +71,7 @@ describe('ButterKeyedEnum', () => {
     }
   });
 
+
   it('should create an enum object with the provided values and add keys', () => {
     expect(Fruits.enum.apple).toEqual({
       name: 'Apple',
@@ -146,26 +147,67 @@ describe('ButterKeyedEnum', () => {
     expect(EmptyEnum.keys).toEqual([]);
     expect(EmptyEnum.values).toEqual([]);
   });
+
+
+  const Slugs = ButterKeyedEnum({
+    apple: {
+      name: 'Apple',
+      color: 'red',
+      sweetness: 7
+    },
+    banana: {
+      name: 'Banana',
+      color: 'yellow',
+      sweetness: 8
+    },
+    lemon: {
+      name: 'Lemon',
+      color: 'yellow',
+      sweetness: 2,
+    }
+  }, {
+    keyName: 'slug'
+  });
+
+  it('should create an enum object with the provided values and add keys', () => {
+    expect(Slugs.enum.apple).toEqual({
+      name: 'Apple',
+      color: 'red',
+      sweetness: 7,
+      slug: 'apple'
+    });
+    expect(Slugs.enum.banana.slug).toBe('banana');
+    expect(Slugs.enum.lemon.slug).toBe('lemon');
+  });
+
+  it('should retrieve values by key using get()', () => {
+    expect(Slugs.get('apple')).toEqual({
+      name: 'Apple',
+      color: 'red',
+      sweetness: 7,
+      slug: 'apple'
+    });
+    expect(Slugs.get('nonexistent')).toBeUndefined();
+  });
+
+  it('should retrieve multiple values by keys using getMany()', () => {
+    const result = Slugs.getMany(['apple', 'lemon']);
+    expect(result).toHaveLength(2);
+    expect(result[0].name).toBe('Apple');
+    expect(result[1].name).toBe('Lemon');
+
+    // Should handle nonexistent keys
+    expect(Slugs.getMany(['apple', 'nonexistent'])[1]).toBeUndefined();
+  });
+
+  it('should provide all keys', () => {
+    expect(Slugs.keys).toEqual(['apple', 'banana', 'lemon']);
+  });
+
+  it('should provide all values', () => {
+    expect(Slugs.values).toHaveLength(3);
+    expect(Slugs.values[0].slug).toBe('apple');
+    expect(Slugs.values[1].slug).toBe('banana');
+    expect(Slugs.values[2].slug).toBe('lemon');
+  });
 });
-
-const ColorsTupleEnum = ButterTupleEnum(['red', 'green', 'blue']);
-const red = ColorsTupleEnum.enum.red
-//    ^? "red"
-const colorTuple = ColorsTupleEnum.tuple
-//    ^? ["red", "green", "blue"]
-
-const ColorsKeyedEnum = ButterKeyedEnum({
-  green: {
-    emoji: '🟩',
-    hex: '#00FF00'
-  },
-});
-const greenKey = ColorsKeyedEnum.enum.green.key
-//    ^? "green" 
-
-const greenValue = ColorsKeyedEnum.enum.green
-//    ^? { emoji: "🟩", hex: "#00FF00", key: "green" }
-
-const greenEmoji = ColorsKeyedEnum.enum.green.emoji
-//    ^? "🟩"
-

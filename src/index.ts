@@ -98,10 +98,24 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
  * @template TEnum The object type containing enum entries
  * @returns The keyed enum object with helper methods
  */
-export function ButterKeyedEnum<const T extends { [key: string]: { key?: never, [key: string]: any } }>(enumObject: T) {
+export function ButterKeyedEnum<
+KeyName extends string = "key",
+const T extends {
+  [K in keyof T]: KeyName extends keyof T[K] ? never : Record<string, any>
+} = {
+  [key: string]: any
+}
+>(
+  enumObject: T,
+  options?: { keyName?: KeyName }
+) {
   const $enum = deepFreeze(Object.fromEntries(Object.entries(enumObject)
-    .map(([key, value]) => [key, { ...value, key }])
-  )) satisfies { [k: string]: { key: string } } as Readonly<HoistKeyToInner<T>>
+    .map(([key, value]: [string, any]) => [key, { ...value as Record<string, any>, [options?.keyName ?? "key"]: key }])
+  )) satisfies {
+    [k: string]: {
+      [k: string]: any
+    }
+  }
 
   /**
    * Gets multiple values by keys
@@ -123,7 +137,7 @@ export function ButterKeyedEnum<const T extends { [key: string]: { key?: never, 
      * 
      * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
      */
-    enum: $enum,
+    enum: $enum as Readonly<HoistKeyToInner<T, KeyName>>,
     /**
      * Gets a value by key
      *
@@ -171,10 +185,10 @@ export function ButterKeyedEnum<const T extends { [key: string]: { key?: never, 
  * @template T The input object type with nested objects as values
  * @returns A type with the same structure but with keys hoisted into each value
  */
-type HoistKeyToInner<T> = {
+type HoistKeyToInner<T, KeyName extends string = "key"> = {
   [K in keyof T]: {
-    [P in keyof T[K] as P extends "key" ? never : P]: T[K][P];
+    [P in keyof T[K] as P extends KeyName ? never : P]: T[K][P];
   } extends infer O
-    ? { [P in keyof O | "key"]: P extends keyof O ? O[P] : K }
+    ? { [P in keyof O | KeyName]: P extends keyof O ? O[P] : K }
     : never;
 }
