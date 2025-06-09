@@ -25,7 +25,6 @@ export declare function ButterTupleEnum<const T extends readonly string[]>(tuple
      * @type {T} The tuple of strings
      */
     tuple: T;
-    mapTuple: <U>(fn: (value: T[number], index: number, tuple: T) => U) => { [K in keyof T]: U; };
     /**
      * The enum object
      *

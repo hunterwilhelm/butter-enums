@@ -17,7 +17,7 @@ describe('ButterKeyedEnum', () => {
     lemon: {
       name: 'Lemon',
       color: 'yellow',
-      sweetness: 2
+      sweetness: 2,
     }
   }, {
     tupleFactory: (enumObject) => [
@@ -302,11 +302,11 @@ describe('ButterKeyedEnum', () => {
     expect(Slugs.values[2].slug).toBe('lemon');
   });
 
-  it('should map over the tuple', () => {
-    expect(Slugs.mapTuple(value => value.slug.toUpperCase())).toEqual([
-      'LEMON',
-      'BANANA',
-      'APPLE',
-    ])
-  })
+  it('should map tuple by property', () => {
+    expect(Slugs.getTupleValuesByProperty('slug')).toEqual([
+      'lemon',
+      'banana',
+      'apple',
+    ]);
+  });
 });

@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ButterTupleEnum = ButterTupleEnum;
 const deep_freeze_es6_1 = __importDefault(require("deep-freeze-es6"));
-const mapTuple_1 = require("./mapTuple");
 /**
  * Butter Tuple Enum
  *
@@ -36,7 +35,6 @@ function ButterTupleEnum(tuple) {
          * @type {T} The tuple of strings
          */
         tuple: $tuple,
-        mapTuple: (fn) => (0, mapTuple_1.mapTuple)($tuple, fn),
         /**
          * The enum object
          *

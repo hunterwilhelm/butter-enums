@@ -46,7 +46,12 @@
  * @throws {Error} If the `tupleFactory` does not return a tuple that includes all keys, a compile-time type error will occur.
  */
 export declare function ButterKeyedEnum<KeyName extends string = "key", const T extends {
-    [K in keyof T]: KeyName extends keyof T[K] ? never : Record<string, any>;
+    [K in keyof T]: KeyName extends keyof T[K] ? {
+        [K2 in keyof T[K]]: K2 extends KeyName ? {
+            error: "You must not include the keyName in the inner objects";
+            value: never;
+        } : any;
+    } & Record<string, any> : Record<string, any>;
 } = {
     [key: string]: any;
 }, TTuple extends [T[keyof T], ...T[keyof T][]] = [T[keyof T], ...T[keyof T][]], TResult extends [T[keyof T], ...T[keyof T][]] = TTuple>(enumObject: T, options: {
@@ -83,7 +88,34 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
     readonly tuple: TResult;
-    readonly mapTuple: <U>(fn: (value: TResult[number], index: number, array: TResult) => U) => { [K in keyof TResult]: U; };
+    /**
+     * Maps a property of the tuple to an array of values
+     *
+     * @example
+     * ```typescript
+     * const colorsEnum = ButterKeyedEnum({
+     *   green: {
+     *     emoji: '🟩',
+     *     hex: '#00FF00',
+     *   },
+     *   red: {
+     *     emoji: '🟥',
+     *     hex: '#FF0000',
+     *   },
+     * }, {
+     *   tupleFactory: (enumObject) => [
+     *     enumObject.green,
+     *     enumObject.red,
+     *   ]
+     * })
+     *
+     * colorsEnum.getTupleValuesByProperty('emoji') // ['🟩', '🟥']
+     * ```
+     *
+     * @param property The property to map
+     * @returns An array of values from the tuple
+     */
+    readonly getTupleValuesByProperty: <TProperty extends keyof TResult[number]>(property: TProperty) => { [TIndex in keyof TResult]: TResult[TIndex][TProperty]; };
     /**
      * Gets a value by key
      *

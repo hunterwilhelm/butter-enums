@@ -1,5 +1,4 @@
 import deepFreeze from "deep-freeze-es6"
-import { mapTuple } from "./mapTuple"
 
 /**
  * Butter Tuple Enum
@@ -34,7 +33,6 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
      * @type {T} The tuple of strings
      */
     tuple: $tuple,
-    mapTuple: <U>(fn: (value: T[number], index: number, tuple: typeof $tuple) => U) => mapTuple($tuple, fn),
     /**
      * The enum object
      *

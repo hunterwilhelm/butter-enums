@@ -1,5 +1,4 @@
 import deepFreeze from "deep-freeze-es6"
-import { mapTuple } from "./mapTuple"
 
 /**
  * Butter Keyed Enum
@@ -51,7 +50,9 @@ import { mapTuple } from "./mapTuple"
 export function ButterKeyedEnum<
 KeyName extends string = "key",
 const T extends {
-  [K in keyof T]: KeyName extends keyof T[K] ? never : Record<string, any>
+  [K in keyof T]: KeyName extends keyof T[K] ? 
+  // this is a way to show the error on [keyName] in the 
+  { [K2 in keyof T[K]]: K2 extends KeyName ? { error: "You must not include the keyName in the inner objects", value: never } : any } & Record<string, any> : Record<string, any>
 } = {
   [key: string]: any
 },
@@ -116,7 +117,38 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
     tuple: $tuple,
-    mapTuple: <U>(fn: (value: typeof $tuple[number], index: number, array: typeof $tuple) => U) => mapTuple($tuple, fn),
+    /**
+     * Maps a property of the tuple to an array of values
+     * 
+     * @example
+     * ```typescript
+     * const colorsEnum = ButterKeyedEnum({
+     *   green: {
+     *     emoji: '🟩',
+     *     hex: '#00FF00',
+     *   },
+     *   red: {
+     *     emoji: '🟥',
+     *     hex: '#FF0000',
+     *   },
+     * }, {
+     *   tupleFactory: (enumObject) => [
+     *     enumObject.green,
+     *     enumObject.red,
+     *   ]
+     * })
+     * 
+     * colorsEnum.getTupleValuesByProperty('emoji') // ['🟩', '🟥']
+     * ```
+     *
+     * @param property The property to map
+     * @returns An array of values from the tuple
+     */
+    getTupleValuesByProperty<TProperty extends keyof TResult[number]>(property: TProperty): {
+      [TIndex in keyof TResult]: TResult[TIndex][TProperty]
+    } {
+      return $tuple.map((value: TTuple[number]) => value[property]) satisfies TTuple[number][TProperty][] as any
+    },
     /**
      * Gets a value by key
      *

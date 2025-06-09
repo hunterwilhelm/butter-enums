@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ButterKeyedEnum = ButterKeyedEnum;
 const deep_freeze_es6_1 = __importDefault(require("deep-freeze-es6"));
-const mapTuple_1 = require("./mapTuple");
 /**
  * Butter Keyed Enum
  *
@@ -73,7 +72,36 @@ function ButterKeyedEnum(enumObject, options) {
          * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
          */
         tuple: $tuple,
-        mapTuple: (fn) => (0, mapTuple_1.mapTuple)($tuple, fn),
+        /**
+         * Maps a property of the tuple to an array of values
+         *
+         * @example
+         * ```typescript
+         * const colorsEnum = ButterKeyedEnum({
+         *   green: {
+         *     emoji: '🟩',
+         *     hex: '#00FF00',
+         *   },
+         *   red: {
+         *     emoji: '🟥',
+         *     hex: '#FF0000',
+         *   },
+         * }, {
+         *   tupleFactory: (enumObject) => [
+         *     enumObject.green,
+         *     enumObject.red,
+         *   ]
+         * })
+         *
+         * colorsEnum.getTupleValuesByProperty('emoji') // ['🟩', '🟥']
+         * ```
+         *
+         * @param property The property to map
+         * @returns An array of values from the tuple
+         */
+        getTupleValuesByProperty(property) {
+            return $tuple.map((value) => value[property]);
+        },
         /**
          * Gets a value by key
          *

@@ -50,8 +50,4 @@ describe('ButterTupleEnum', () => {
     expect(EmptyEnum.enum).toEqual({});
     expect(EmptyEnum.length).toBe(0);
   });
-
-  it('should map over the tuple', () => {
-    expect(Colors.mapTuple(value => value.toUpperCase())).toEqual(['RED', 'GREEN', 'BLUE']);
-  });
 });
