@@ -1,3 +1,4 @@
+import { ButterEnumsErrorMessage } from "./shared/error-message";
 /**
  * Butter Keyed Enum
  *
@@ -23,12 +24,12 @@
  * @template KeyName - The name of the property to hoist the key into. Defaults to `"key"`.
  * @template T - The original enum-like object whose keys should not conflict with `keyName` in inner objects.
  * @template TTuple - The tuple of values derived from `T` that will represent the enum values.
- * @template TResult - The final result tuple validated against the keys of `T`.
+ * @template TTuple - The final result tuple validated against the keys of `T`.
  *
  * @param {T} enumObject - The original object representing the enum-like mapping.
  * @param {Object} options - Configuration options.
  * @param {KeyName} [options.keyName="key"] - The name of the key to inject into each value.
- * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TResult} options.tupleFactory - A factory function
+ * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TTuple} options.tupleFactory - A factory function
  *   that takes the modified enum object with keys hoisted and returns a tuple. It must include all keys from `enumObject`.
  *
  *   This is required because typescript cannot convert from a union to a tuple with
@@ -46,15 +47,16 @@
  * @throws {Error} If the `tupleFactory` does not return a tuple that includes all keys, a compile-time type error will occur.
  */
 export declare function ButterKeyedEnum<KeyName extends string = "key", const T extends {
-    [K in keyof T]: KeyName extends keyof T[K] ? {
+    [K in keyof T]: KeyName extends keyof T[K] ? // this is a way to show the error on [keyName] in the
+    {
         [K2 in keyof T[K]]: K2 extends KeyName ? {
-            error: "You must not include the keyName in the inner objects";
+            __error__: "You must not include the keyName in the inner objects";
             value: never;
         } : any;
     } & Record<string, any> : Record<string, any>;
 } = {
     [key: string]: any;
-}, TTuple extends [T[keyof T], ...T[keyof T][]] = [T[keyof T], ...T[keyof T][]], TResult extends [T[keyof T], ...T[keyof T][]] = TTuple>(enumObject: T, options: {
+}, TTuple extends [T[keyof T], ...T[keyof T][]] | [] = []>(enumObject: T, options?: {
     keyName?: KeyName;
     /**
      * A factory function that takes the modified enum object with keys hoisted and returns a tuple.
@@ -71,23 +73,20 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      * So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
      * Making our typescript compiler happy.
      */
-    tupleFactory: (enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => IsTypeEqual<TResult[number][KeyName], keyof T> extends true ? TResult : {
-        error: "You must include all keys in the tuple";
-        value: never;
-    };
+    tupleFactory?: (enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => IsTypeEqual<NonNullable<TTuple>[number][KeyName], keyof T> extends true ? NonNullable<TTuple> : ButterEnumsErrorMessage<"You must include all keys in the tuple">;
 }): {
-    /**
-     * The enum object
-     *
-     * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
-     */
-    readonly enum: Readonly<HoistKeyToInner<T, KeyName>>;
     /**
      * An ordered array of enum values as specified by the tupleFactory function
      *
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
-    readonly tuple: TResult;
+    readonly tuple: TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want a tuple, and ensure it's not empty"> : TTuple;
+    /**
+     * An ordered array of keys as specified by the tupleFactory function
+     *
+     * @type {TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty"> : { [TIndex in keyof TTuple]: TTuple[TIndex][KeyName]; }} The ordered keys of the enum
+     */
+    readonly orderedKeys: TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty"> : { [TIndex in keyof TTuple]: TTuple[TIndex][KeyName]; };
     /**
      * Maps a property of the tuple to an array of values
      *
@@ -115,7 +114,13 @@ export declare function ButterKeyedEnum<KeyName extends string = "key", const T 
      * @param property The property to map
      * @returns An array of values from the tuple
      */
-    readonly getTupleValuesByProperty: <TProperty extends keyof TResult[number]>(property: TProperty) => { [TIndex in keyof TResult]: TResult[TIndex][TProperty]; };
+    readonly getTupleValuesByProperty: <TProperty extends keyof TTuple[number]>(property: TProperty) => TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want a tuple, and ensure it's not empty"> : { [TIndex in keyof TTuple]: TTuple[TIndex][TProperty]; };
+    /**
+     * The enum object
+     *
+     * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
+     */
+    readonly enum: Readonly<HoistKeyToInner<T, KeyName>>;
     /**
      * Gets a value by key
      *
@@ -166,5 +171,5 @@ type HoistKeyToInner<T, KeyName extends string = "key"> = {
 /**
  * Utility type that checks if two types are equal
  */
-type IsTypeEqual<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
+type IsTypeEqual<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 export {};

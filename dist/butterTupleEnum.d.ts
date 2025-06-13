@@ -32,6 +32,12 @@ export declare function ButterTupleEnum<const T extends readonly string[]>(tuple
      */
     enum: { [key in T[number]]: key; };
     /**
+     * Same as tuple, but the type is an unordered union
+     *
+     * @type {T[number][]} The keys of the tuple
+     */
+    keys: T[number][];
+    /**
      * Gets a value by index
      *
      * @param index The index of the tuple element to retrieve

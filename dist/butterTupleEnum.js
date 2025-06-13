@@ -42,6 +42,12 @@ function ButterTupleEnum(tuple) {
          */
         enum: (0, deep_freeze_es6_1.default)($enum),
         /**
+         * Same as tuple, but the type is an unordered union
+         *
+         * @type {T[number][]} The keys of the tuple
+         */
+        keys: $tuple,
+        /**
          * Gets a value by index
          *
          * @param index The index of the tuple element to retrieve

@@ -30,12 +30,12 @@ const deep_freeze_es6_1 = __importDefault(require("deep-freeze-es6"));
  * @template KeyName - The name of the property to hoist the key into. Defaults to `"key"`.
  * @template T - The original enum-like object whose keys should not conflict with `keyName` in inner objects.
  * @template TTuple - The tuple of values derived from `T` that will represent the enum values.
- * @template TResult - The final result tuple validated against the keys of `T`.
+ * @template TTuple - The final result tuple validated against the keys of `T`.
  *
  * @param {T} enumObject - The original object representing the enum-like mapping.
  * @param {Object} options - Configuration options.
  * @param {KeyName} [options.keyName="key"] - The name of the key to inject into each value.
- * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TResult} options.tupleFactory - A factory function
+ * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TTuple} options.tupleFactory - A factory function
  *   that takes the modified enum object with keys hoisted and returns a tuple. It must include all keys from `enumObject`.
  *
  *   This is required because typescript cannot convert from a union to a tuple with
@@ -53,25 +53,47 @@ const deep_freeze_es6_1 = __importDefault(require("deep-freeze-es6"));
  * @throws {Error} If the `tupleFactory` does not return a tuple that includes all keys, a compile-time type error will occur.
  */
 function ButterKeyedEnum(enumObject, options) {
-    const $enum = (0, deep_freeze_es6_1.default)(Object.fromEntries(Object.entries(enumObject)
-        .map(([key, value]) => [key, { ...value, [options?.keyName ?? "key"]: key }])));
-    const $tuple = (0, deep_freeze_es6_1.default)(options.tupleFactory($enum));
+    const $enum = (0, deep_freeze_es6_1.default)(Object.fromEntries(Object.entries(enumObject).map(([key, value]) => [
+        key,
+        { ...value, [options?.keyName ?? "key"]: key },
+    ])));
+    const $tuple = options?.tupleFactory
+        ? (0, deep_freeze_es6_1.default)(options.tupleFactory($enum))
+        : [];
     function getMany(keys) {
-        return keys.map(key => $enum[key]);
+        return keys.map((key) => $enum[key]);
     }
     return {
-        /**
-         * The enum object
-         *
-         * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
-         */
-        enum: $enum,
+        /// TUPLE DEPENDENT
+        ///
         /**
          * An ordered array of enum values as specified by the tupleFactory function
          *
          * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
          */
-        tuple: $tuple,
+        get tuple() {
+            if ($tuple.length === 0) {
+                return {
+                    __error__: "Provide tupleFactory if you want a tuple, and ensure it's not empty",
+                    value: undefined,
+                };
+            }
+            return $tuple;
+        },
+        /**
+         * An ordered array of keys as specified by the tupleFactory function
+         *
+         * @type {TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty"> : { [TIndex in keyof TTuple]: TTuple[TIndex][KeyName]; }} The ordered keys of the enum
+         */
+        get orderedKeys() {
+            if ($tuple.length === 0) {
+                return {
+                    __error__: "Provide tupleFactory if you want ordered keys, and ensure it's not empty",
+                    value: undefined,
+                };
+            }
+            return $tuple.map((value) => value[options?.keyName ?? "key"]);
+        },
         /**
          * Maps a property of the tuple to an array of values
          *
@@ -100,8 +122,21 @@ function ButterKeyedEnum(enumObject, options) {
          * @returns An array of values from the tuple
          */
         getTupleValuesByProperty(property) {
+            if ($tuple.length === 0) {
+                return {
+                    __error__: "Provide tupleFactory if you want a tuple, and ensure it's not empty",
+                    value: undefined,
+                };
+            }
             return $tuple.map((value) => value[property]);
         },
+        /// NON-TUPLE DEPENDENT
+        /**
+         * The enum object
+         *
+         * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
+         */
+        enum: $enum,
         /**
          * Gets a value by key
          *
@@ -136,6 +171,6 @@ function ButterKeyedEnum(enumObject, options) {
          */
         find(predicate) {
             return Object.values($enum).find((value, key) => predicate(value, key, $enum));
-        }
+        },
     };
 }

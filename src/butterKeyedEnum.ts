@@ -145,6 +145,11 @@ export function ButterKeyedEnum<
       }
       return $tuple as any;
     },
+    /**
+     * An ordered array of keys as specified by the tupleFactory function
+     *
+     * @type {TTuple extends [] ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty"> : { [TIndex in keyof TTuple]: TTuple[TIndex][KeyName]; }} The ordered keys of the enum
+     */
     get orderedKeys(): TTuple extends []
       ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty">
       : {
