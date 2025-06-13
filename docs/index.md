@@ -64,7 +64,8 @@ const test = ButterKeyedEnum({
     hex: '#00FF00',
   },
 }, {
-  // This is required because typescript cannot convert from a union to a tuple with
+  // This is optional, but if you want tuple support or ordered keys, you must provide it.
+  // Typescript cannot convert from a union to a tuple with
   // * Guaranteed order
   // * Better performance than O(n^2)
   // See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
