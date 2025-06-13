@@ -56,5 +56,5 @@ export declare function ButterTupleEnum<const T extends readonly string[]>(tuple
      *
      * @returns {number} The length of the tuple
      */
-    readonly length: number;
+    readonly length: T["length"];
 };

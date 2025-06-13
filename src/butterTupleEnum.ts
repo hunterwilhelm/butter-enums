@@ -68,7 +68,7 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
      *
      * @returns {number} The length of the tuple
      */
-    get length(): number {
+    get length(): T['length'] {
       return $tuple.length
     }
   }
