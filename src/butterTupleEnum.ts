@@ -51,7 +51,7 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
      * @param index The index of the tuple element to retrieve
      * @returns {string | undefined} The value at the given index or undefined if index is out of bounds
      */
-    get(index: number): string | undefined {
+    get<TIndex extends number>(index: TIndex): T[TIndex] {
       return $tuple[index]
     },
     /**
