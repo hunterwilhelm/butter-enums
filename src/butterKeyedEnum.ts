@@ -1,4 +1,5 @@
-import deepFreeze from "deep-freeze-es6"
+import deepFreeze from "deep-freeze-es6";
+import { ButterEnumsErrorMessage } from "./shared/error-message";
 
 /**
  * Butter Keyed Enum
@@ -21,74 +22,94 @@ import deepFreeze from "deep-freeze-es6"
  * colorsEnum.get('green') // { emoji: '🟩', hex: '#00FF00', key: 'green' }
  * colorsEnum.keys // ['green']
  * ```
- * 
+ *
  * @template KeyName - The name of the property to hoist the key into. Defaults to `"key"`.
  * @template T - The original enum-like object whose keys should not conflict with `keyName` in inner objects.
  * @template TTuple - The tuple of values derived from `T` that will represent the enum values.
- * @template TResult - The final result tuple validated against the keys of `T`.
- * 
+ * @template TTuple - The final result tuple validated against the keys of `T`.
+ *
  * @param {T} enumObject - The original object representing the enum-like mapping.
  * @param {Object} options - Configuration options.
  * @param {KeyName} [options.keyName="key"] - The name of the key to inject into each value.
- * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TResult} options.tupleFactory - A factory function
+ * @param {(enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => TTuple} options.tupleFactory - A factory function
  *   that takes the modified enum object with keys hoisted and returns a tuple. It must include all keys from `enumObject`.
- * 
+ *
  *   This is required because typescript cannot convert from a union to a tuple with
  *   * Guaranteed order
  *   * Better performance than O(n^2)
  *   See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
- *   
+ *
  *   So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
  *   Making our typescript compiler happy.
- * 
+ *
  * @returns {void} This function does not return anything directly, but can be used to enforce compile-time constraints
  *   and build strongly typed enums using TypeScript's type system.
- * 
+ *
  * @throws {TypeError} If any object in `enumObject` already contains the `keyName` property, it will result in a type error.
  * @throws {Error} If the `tupleFactory` does not return a tuple that includes all keys, a compile-time type error will occur.
  */
 export function ButterKeyedEnum<
-KeyName extends string = "key",
-const T extends {
-  [K in keyof T]: KeyName extends keyof T[K] ? 
-  // this is a way to show the error on [keyName] in the 
-  { [K2 in keyof T[K]]: K2 extends KeyName ? { error: "You must not include the keyName in the inner objects", value: never } : any } & Record<string, any> : Record<string, any>
-} = {
-  [key: string]: any
-},
-TTuple extends [T[keyof T], ...T[keyof T][]] = [T[keyof T], ...T[keyof T][]],
-TResult extends [T[keyof T], ...T[keyof T][]] = TTuple, 
+  KeyName extends string = "key",
+  const T extends {
+    [K in keyof T]: KeyName extends keyof T[K]
+      ? // this is a way to show the error on [keyName] in the
+        {
+          [K2 in keyof T[K]]: K2 extends KeyName
+            ? {
+                __error__: "You must not include the keyName in the inner objects";
+                value: never;
+              }
+            : any;
+        } & Record<string, any>
+      : Record<string, any>;
+  } = {
+    [key: string]: any;
+  },
+  TTuple extends [T[keyof T], ...T[keyof T][]] | [] = []
 >(
   enumObject: T,
-  options: { 
-    keyName?: KeyName, 
+  options?: {
+    keyName?: KeyName;
     /**
      * A factory function that takes the modified enum object with keys hoisted and returns a tuple.
      * It must include all keys from `enumObject`.
-     * 
+     *
      * @param enumObject The enum object with keys hoisted into each value
      * @returns A tuple of values from the enum object
-     * 
+     *
      * This is required because typescript cannot convert from a union to a tuple with
      * * Guaranteed order
      * * Better performance than O(n^2)
      * See https://stackoverflow.com/questions/55127004/how-to-transform-union-type-to-tuple-type
-     * 
+     *
      * So, we have to provide a tuple factory. It constrains the tuple to make sure you're not missing any values.
      * Making our typescript compiler happy.
      */
-    tupleFactory: (enumObject: Readonly<HoistKeyToInner<T, KeyName>>) => IsTypeEqual<TResult[number][KeyName], keyof T> extends true
-    ? TResult
-    : { error: "You must include all keys in the tuple", value: never } }
+    tupleFactory?: (
+      enumObject: Readonly<HoistKeyToInner<T, KeyName>>
+    ) => IsTypeEqual<
+      NonNullable<TTuple>[number][KeyName],
+      keyof T
+    > extends true
+      ? NonNullable<TTuple>
+      : ButterEnumsErrorMessage<"You must include all keys in the tuple">;
+  }
 ) {
-  const $enum = deepFreeze(Object.fromEntries(Object.entries(enumObject)
-    .map(([key, value]: [string, any]) => [key, { ...value as Record<string, any>, [options?.keyName ?? "key"]: key }])
-  )) satisfies {
+  const $enum = deepFreeze(
+    Object.fromEntries(
+      Object.entries(enumObject).map(([key, value]: [string, any]) => [
+        key,
+        { ...(value as Record<string, any>), [options?.keyName ?? "key"]: key },
+      ])
+    )
+  ) satisfies {
     [k: string]: {
-      [k: string]: any
-    }
-  } as Readonly<HoistKeyToInner<T, KeyName>>
-  const $tuple = deepFreeze(options.tupleFactory($enum) as TResult)
+      [k: string]: any;
+    };
+  } as Readonly<HoistKeyToInner<T, KeyName>>;
+  const $tuple = options?.tupleFactory
+    ? deepFreeze(options.tupleFactory($enum) as TTuple)
+    : ([] as never);
 
   /**
    * Gets multiple values by keys
@@ -99,27 +120,50 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
   function getMany(keys: (keyof TEnum)[]): TEnum[keyof TEnum][];
   function getMany(keys: string[]): (TEnum[keyof TEnum] | undefined)[];
   function getMany(keys: (keyof TEnum | (string & {}))[]) {
-      return keys.map(key => $enum[key as keyof TEnum])
+    return keys.map((key) => $enum[key as keyof TEnum]);
   }
 
-
-  type TEnum = typeof $enum
+  type TEnum = typeof $enum;
   return {
-    /**
-     * The enum object
-     * 
-     * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
-     */
-    enum: $enum,
+    /// TUPLE DEPENDENT
+    ///
+
     /**
      * An ordered array of enum values as specified by the tupleFactory function
-     * 
+     *
      * @type {TTuple} The tuple of enum values in the order defined by tupleFactory
      */
-    tuple: $tuple,
+    get tuple(): TTuple extends []
+      ? ButterEnumsErrorMessage<"Provide tupleFactory if you want a tuple, and ensure it's not empty">
+      : TTuple {
+      if ($tuple.length === 0) {
+        return {
+          __error__:
+            "Provide tupleFactory if you want a tuple, and ensure it's not empty",
+          value: undefined as never,
+        } as any;
+      }
+      return $tuple as any;
+    },
+    get orderedKeys(): TTuple extends []
+      ? ButterEnumsErrorMessage<"Provide tupleFactory if you want ordered keys, and ensure it's not empty">
+      : {
+          [TIndex in keyof TTuple]: TTuple[TIndex][KeyName];
+        } {
+      if ($tuple.length === 0) {
+        return {
+          __error__:
+            "Provide tupleFactory if you want ordered keys, and ensure it's not empty",
+          value: undefined as never,
+        } as any;
+      }
+      return $tuple.map(
+        (value: TTuple[number]) => value[options?.keyName ?? "key"]
+      ) as any
+    },
     /**
      * Maps a property of the tuple to an array of values
-     * 
+     *
      * @example
      * ```typescript
      * const colorsEnum = ButterKeyedEnum({
@@ -137,18 +181,40 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      *     enumObject.red,
      *   ]
      * })
-     * 
+     *
      * colorsEnum.getTupleValuesByProperty('emoji') // ['🟩', '🟥']
      * ```
      *
      * @param property The property to map
      * @returns An array of values from the tuple
      */
-    getTupleValuesByProperty<TProperty extends keyof TResult[number]>(property: TProperty): {
-      [TIndex in keyof TResult]: TResult[TIndex][TProperty]
-    } {
-      return $tuple.map((value: TTuple[number]) => value[property]) satisfies TTuple[number][TProperty][] as any
+    getTupleValuesByProperty<TProperty extends keyof TTuple[number]>(
+      property: TProperty
+    ): TTuple extends []
+      ? ButterEnumsErrorMessage<"Provide tupleFactory if you want a tuple, and ensure it's not empty">
+      : {
+          [TIndex in keyof TTuple]: TTuple[TIndex][TProperty];
+        } {
+      if ($tuple.length === 0) {
+        return {
+          __error__:
+            "Provide tupleFactory if you want a tuple, and ensure it's not empty",
+          value: undefined as never,
+        } as any;
+      }
+      return $tuple.map(
+        (value: TTuple[number]) => value[property]
+      ) satisfies TTuple[number][TProperty][] as any;
     },
+
+    /// NON-TUPLE DEPENDENT
+
+    /**
+     * The enum object
+     *
+     * @type {Readonly<TEnum>} The enum object with keys hoisted into each value
+     */
+    enum: $enum,
     /**
      * Gets a value by key
      *
@@ -156,7 +222,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @returns {TEnum[keyof TEnum] | undefined} The value for the given key or undefined if the key doesn't exist
      */
     get(key: keyof TEnum | (string & {})): TEnum[keyof TEnum] | undefined {
-      return $enum[key as keyof TEnum]
+      return $enum[key as keyof TEnum];
     },
     getMany,
     /**
@@ -165,7 +231,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @returns {(keyof TEnum)[]} All keys in the enum
      */
     get keys(): (keyof TEnum)[] {
-      return Object.keys($enum) satisfies string[] as (keyof TEnum)[]
+      return Object.keys($enum) satisfies string[] as (keyof TEnum)[];
     },
     /**
      * All values in the enum
@@ -173,7 +239,7 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @returns {TEnum[keyof TEnum][]} All values in the enum
      */
     get values(): TEnum[keyof TEnum][] {
-      return Object.values($enum)
+      return Object.values($enum);
     },
     /**
      * Finds a value by predicate
@@ -181,18 +247,26 @@ TResult extends [T[keyof T], ...T[keyof T][]] = TTuple,
      * @param predicate A function that tests each value for a condition
      * @returns {TEnum[keyof TEnum] | undefined} The first value that matches the predicate or undefined if no match is found
      */
-    find(predicate: (value: TEnum[keyof TEnum], key: keyof TEnum, enumObject: TEnum) => boolean): TEnum[keyof TEnum] | undefined {
-      return Object.values($enum).find((value: any, key: any) => predicate(value, key, $enum)) as any
-    }
-  } as const
+    find(
+      predicate: (
+        value: TEnum[keyof TEnum],
+        key: keyof TEnum,
+        enumObject: TEnum
+      ) => boolean
+    ): TEnum[keyof TEnum] | undefined {
+      return Object.values($enum).find((value: any, key: any) =>
+        predicate(value, key, $enum)
+      ) as any;
+    },
+  } as const;
 }
 
 /**
  * Utility type that hoists the key name into each value object
- * 
+ *
  * This type takes an object of objects and adds the key of the outer object as a 'key' property
  * to each inner object, while preserving all other properties of the inner objects.
- * 
+ *
  * @template T The input object type with nested objects as values
  * @returns A type with the same structure but with keys hoisted into each value
  */
@@ -202,11 +276,13 @@ type HoistKeyToInner<T, KeyName extends string = "key"> = {
   } extends infer O
     ? { [P in keyof O | KeyName]: P extends keyof O ? O[P] : K }
     : never;
-}
+};
 
 /**
  * Utility type that checks if two types are equal
  */
-type IsTypeEqual<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends
-  (<T>() => T extends B ? 1 : 2) ? true : false;
+type IsTypeEqual<A, B> = (<T>() => T extends A ? 1 : 2) extends <
+  T
+>() => T extends B ? 1 : 2
+  ? true
+  : false;

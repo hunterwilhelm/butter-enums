@@ -40,6 +40,12 @@ export function ButterTupleEnum<const T extends readonly string[]>(tuple: T) {
      */
     enum: deepFreeze($enum),
     /**
+     * Same as tuple, but the type is an unordered union
+     *
+     * @type {T[number][]} The keys of the tuple
+     */
+    keys: $tuple as unknown as T[number][],
+    /**
      * Gets a value by index
      *
      * @param index The index of the tuple element to retrieve

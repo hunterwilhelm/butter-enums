@@ -50,4 +50,8 @@ describe('ButterTupleEnum', () => {
     expect(EmptyEnum.enum).toEqual({});
     expect(EmptyEnum.length).toBe(0);
   });
+
+  it('should provide the keys', () => {
+    expect(Colors.keys).toEqual(['red', 'green', 'blue']);
+  });
 });

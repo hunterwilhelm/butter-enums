@@ -15,5 +15,6 @@ release:
   git push origin "v$(jq .version package.json)"
   read -p "Press any key to publish..."
   npm publish
+  gh release create "v$(jq .version package.json)" -t "$tagMessage" -n "Release $version"
 
   
